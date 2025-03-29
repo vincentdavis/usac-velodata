@@ -4,7 +4,7 @@ from datetime import date, datetime
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, Field, HttpUrl, validator
+from pydantic import BaseModel, Field, HttpUrl, field_validator
 
 
 class Address(BaseModel):
@@ -94,7 +94,7 @@ class ApiEvent(BaseModel):
         frozen = True
 
     @classmethod
-    @validator("start_date", "end_date", pre=True)
+    @field_validator("start_date", "end_date", mode="before")
     def parse_date(cls, value: Any) -> date:
         """Parse date from string if needed."""
         if isinstance(value, str):
@@ -238,7 +238,7 @@ class Rider(BaseModel):
         frozen = True
 
     @classmethod
-    @validator("place", pre=True)
+    @field_validator("place", mode="before")
     def parse_place(cls, value: Any) -> str:
         """Convert place to string and handle special cases."""
         if value is None:
