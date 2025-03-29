@@ -1,0 +1,43 @@
+{
+  "event_lists": [
+    {
+      "url": "https://legacy.usacycling.org/results/browse.php?state=CO&race=&fyear=2020",
+      "downloaded_at": "2025-03-20T14:08:13.839344",
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "content_length": 36514,
+      "description": "Colorado events for 2020"
+    }
+  ],
+  "events": [],
+  "permit_pages": [
+    {
+      "url": "https://legacy.usacycling.org/results/?permit=2020-26",
+      "downloaded_at": "2025-03-20T14:08:17.295409",
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "content_length": 31580,
+      "description": "2020-26"
+    }
+  ],
+  "load_info": [
+    {
+      "url": "https://legacy.usacycling.org/results/index.php?ajax=1&act=infoid&info_id=132893&label=Cross%20Country%20Ultra%20Endurance%2012/02/2020",
+      "downloaded_at": "2025-03-20T14:08:20.432779",
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "content_length": 20,
+      "description": "132893"
+    }
+  ],
+  "race_results": [
+    {
+      "url": "https://legacy.usacycling.org/results/index.php?ajax=1&act=loadresults&race_id=1337864",
+      "downloaded_at": "2025-03-20T14:08:23.594893",
+      "status_code": 200,
+      "content_type": "text/html; charset=UTF-8",
+      "content_length": 20,
+      "description": "1337864"
+    }
+  ]
+}

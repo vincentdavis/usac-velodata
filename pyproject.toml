@@ -1,0 +1,27 @@
+[project]
+name = "usac-velodata"
+version = "2025.3.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Vincent Davis", email = "vincent@heteroskedastic.net" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "beautifulsoup4>=4.13.3",
+    "lxml>=5.3.1",
+    "pydantic>=2.10.6",
+    "python-dateutil>=2.9.0.post0",
+    "requests>=2.32.3",
+    "ruff>=0.11.2",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.5",
+    "ruff>=0.2.0",
+]
