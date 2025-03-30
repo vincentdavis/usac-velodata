@@ -128,10 +128,12 @@ class USACyclingClient:
                         name=event_data["name"],
                         permit_number=event_data.get("permit", ""),
                         date=event_data.get("date", None),
+                        submit_date=event_data.get("submit_date", None),
                         location=event_data.get("location", "Unknown"),
                         state=state,
                         year=year,
                         url=event_data.get("permit_url", None),
+                        html=event_data.get("html", None),
                     )
                     events.append(event)
                 except Exception as e:
@@ -564,7 +566,7 @@ class USACyclingClient:
 
     def get_active_events(self) -> list[EventDetails]:
         """Get active events from the USA Cycling website."""
-        pass # TODO: Implement this method
+        pass  # TODO: Implement this method
 
     def fetch_flyer(
         self,

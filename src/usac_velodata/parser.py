@@ -774,6 +774,7 @@ class EventListParser(BaseParser):
                 "permit": permit,
                 "permit_url": event_url,
                 "submit_date": submit_date,
+                "html": str(cells),
             }
 
             events.append(event)
