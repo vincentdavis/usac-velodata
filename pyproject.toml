@@ -1,7 +1,7 @@
 [project]
 name = "usac-velodata"
-version = "2025.3.0"
-description = "Add your description here"
+version = "2025.3.2"
+description = "Get events, and results from USAC"
 readme = "README.md"
 authors = [
     { name = "Vincent Davis", email = "vincent@heteroskedastic.net" }
