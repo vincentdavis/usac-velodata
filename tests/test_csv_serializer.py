@@ -63,7 +63,7 @@ class TestCsvSerializer(unittest.TestCase):
         self.test_event = Event(
             id="event123",
             name="Test Event",
-            permit_number="2023-123",
+            permit_id="2023-123",
             date=self.test_date,
             location="Somewhere, USA",
             state="WA",
@@ -76,7 +76,7 @@ class TestCsvSerializer(unittest.TestCase):
         self.test_event_details = EventDetails(
             id="event123",
             name="Test Event",
-            permit_number="2023-123",
+            permit_id="2023-123",
             start_date=self.test_date,
             end_date=self.test_date,
             location="Somewhere, USA",
@@ -89,10 +89,7 @@ class TestCsvSerializer(unittest.TestCase):
             registration_url="https://example.com/register",
             is_usac_sanctioned=True,
             categories=["Cat 1/2", "Cat 3", "Cat 4/5"],
-            disciplines=[
-                {"id": "1", "name": "Road Race"},
-                {"id": "2", "name": "Time Trial"}
-            ],
+            disciplines=[{"id": "1", "name": "Road Race"}, {"id": "2", "name": "Time Trial"}],
             description="A test event",
         )
 
@@ -248,7 +245,7 @@ class TestCsvSerializer(unittest.TestCase):
         csv_data = "event123,Test Event,2023-123,2023-01-15,Somewhere USA,WA,2023,road,https://example.com/event"
 
         # The Event model has fields in this order:
-        # id, name, permit_number, date, location, state, year, event_type, url
+        # id, name, permit_id, date, location, state, year, event_type, url
 
         # Convert to model, specifying no header
         models = from_csv(csv_data, Event, has_header=False)

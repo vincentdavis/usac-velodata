@@ -126,7 +126,7 @@ class USACyclingClient:
                     event = Event(
                         id=event_data["id"],
                         name=event_data["name"],
-                        permit_number=event_data.get("permit", ""),
+                        permit_id=event_data.get("permit", ""),
                         date=event_data.get("date", None),
                         submit_date=event_data.get("submit_date", None),
                         location=event_data.get("location", "Unknown"),

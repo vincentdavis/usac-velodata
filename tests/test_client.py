@@ -65,7 +65,7 @@ class TestUSACyclingClient(unittest.TestCase):
         mock_get_event_details.return_value = {
             "id": "2020-26",
             "name": "USA Cycling December VRL",
-            "permit_number": "2020-26",
+            "permit_id": "2020-26",
             "start_date": date(2020, 12, 2),
             "end_date": date(2020, 12, 30),
             "location": "Colorado Springs",
@@ -79,7 +79,7 @@ class TestUSACyclingClient(unittest.TestCase):
             "website": None,
             "registration_url": None,
             "description": None,
-            "dates": []
+            "dates": [],
         }
 
         # Get event details
@@ -164,13 +164,11 @@ class TestUSACyclingClient(unittest.TestCase):
         self.assertEqual(race_results.riders[0].place, "1")
 
     @mock.patch("src.usac_velodata.parser.EventDetailsParser.fetch_permit_page")
-    def test_get_disciplines_for_event(
-        self, mock_fetch_permit_page
-    ):
+    def test_get_disciplines_for_event(self, mock_fetch_permit_page):
         """Test getting disciplines for an event."""
         # Mock fetch_permit_page
         # Load sample data from file
-        with open("samples/permit_pages/2020-26.html", "r") as f:
+        with open("../samples/permit_pages/2020-26.html") as f:
             mock_fetch_permit_page.return_value = f.read()
 
         # Get disciplines
@@ -184,7 +182,6 @@ class TestUSACyclingClient(unittest.TestCase):
         self.assertEqual(disciplines[1]["id"], "132897")
         self.assertEqual(disciplines[1]["name"], "Cross Country Ultra Endurance")
         self.assertEqual(disciplines[1]["label"], "Cross Country Ultra Endurance 12/09/2020")
-
 
     @mock.patch("src.usac_velodata.client.USACyclingClient.get_event_details")
     @mock.patch("src.usac_velodata.client.USACyclingClient.get_disciplines_for_event")
@@ -272,13 +269,13 @@ class TestUSACyclingClient(unittest.TestCase):
 
         # Verify the result
         self.assertEqual(result["status"], "success")
-        
+
         # Verify that FlyerFetcher was initialized correctly
         mock_flyer_fetcher_class.assert_called_once()
         call_kwargs = mock_flyer_fetcher_class.call_args[1]
         self.assertEqual(call_kwargs["storage_dir"], "./test_flyers")
         self.assertEqual(call_kwargs["use_s3"], False)
-        
+
         # Verify that fetch_flyer was called with correct args
         mock_fetcher.fetch_flyer.assert_called_once_with("2020-123")
 
@@ -307,13 +304,13 @@ class TestUSACyclingClient(unittest.TestCase):
 
         # Verify the result
         self.assertEqual(result["total_processed"], 3)
-        
+
         # Verify that FlyerFetcher was initialized correctly
         mock_flyer_fetcher_class.assert_called_once()
         call_kwargs = mock_flyer_fetcher_class.call_args[1]
         self.assertEqual(call_kwargs["storage_dir"], "./test_flyers")
         self.assertEqual(call_kwargs["use_s3"], False)
-        
+
         # Verify that fetch_flyers_batch was called with correct args
         mock_fetcher.fetch_flyers_batch.assert_called_once()
         call_args = mock_fetcher.fetch_flyers_batch.call_args[1]
@@ -334,7 +331,7 @@ class TestUSACyclingClient(unittest.TestCase):
                 "size": 1024,
                 "last_modified": "2023-01-01T00:00:00",
                 "storage": "local",
-                "path": "./test_flyers/2020_123.pdf.gz"
+                "path": "./test_flyers/2020_123.pdf.gz",
             }
         ]
 
@@ -347,13 +344,13 @@ class TestUSACyclingClient(unittest.TestCase):
         # Verify the result
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0]["filename"], "2020_123.pdf")
-        
+
         # Verify that FlyerFetcher was initialized correctly
         mock_flyer_fetcher_class.assert_called_once()
         call_kwargs = mock_flyer_fetcher_class.call_args[1]
         self.assertEqual(call_kwargs["storage_dir"], "./test_flyers")
         self.assertEqual(call_kwargs["use_s3"], False)
-        
+
         # Verify that list_flyers was called
         mock_fetcher.list_flyers.assert_called_once()
 

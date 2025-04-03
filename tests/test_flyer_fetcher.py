@@ -3,15 +3,13 @@
 import gzip
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 from unittest import mock
-import sys
 
 import requests
-from bs4 import BeautifulSoup
 
-from usac_velodata.exceptions import ParseError
 from usac_velodata.parser import FlyerFetcher
 
 
@@ -125,7 +123,6 @@ class TestFlyerFetcher(unittest.TestCase):
         mock_gzipfile.return_value.__enter__.return_value = mock_gzip_context
 
         # Override any previous mocks
-        import boto3
 
         self.fetcher._get_s3_client = mock_get_s3_client
 
@@ -167,7 +164,6 @@ class TestFlyerFetcher(unittest.TestCase):
         source, content = self.fetcher._inspect_html(b"Not HTML content")
         self.assertEqual(source, "custom")
 
-
     @mock.patch("usac_velodata.parser.FlyerFetcher._fetch_with_retries")
     def test_fetch_flyer_pdf(self, mock_fetch):
         """Test fetching a PDF flyer."""
@@ -186,7 +182,7 @@ class TestFlyerFetcher(unittest.TestCase):
         self.assertEqual(result["extension"], ".pdf")
 
         # Verify file was created
-        expected_path = os.path.join(self.temp_dir, f"2020_123.pdf.gz")
+        expected_path = os.path.join(self.temp_dir, "2020_123.pdf.gz")
         self.assertTrue(os.path.exists(expected_path))
 
         # Verify content
@@ -229,10 +225,8 @@ class TestFlyerFetcher(unittest.TestCase):
         self.assertEqual(result["source"], "std")
 
         # Verify file was created
-        expected_path = os.path.join(self.temp_dir, f"2020_123_std.html.gz")
+        expected_path = os.path.join(self.temp_dir, "2020_123_std.html.gz")
         self.assertTrue(os.path.exists(expected_path))
-
-
 
     @mock.patch("usac_velodata.parser.FlyerFetcher._fetch_with_retries")
     def test_fetch_flyer_error(self, mock_fetch):
@@ -265,9 +259,9 @@ class TestFlyerFetcher(unittest.TestCase):
             # Configure mock client to return events
             mock_instance = mock_client.return_value
             mock_instance.get_events.return_value = [
-                mock.MagicMock(permit_number="2020-1"),
-                mock.MagicMock(permit_number="2020-2"),
-                mock.MagicMock(permit_number="2020-3"),
+                mock.MagicMock(permit_id="2020-1"),
+                mock.MagicMock(permit_id="2020-2"),
+                mock.MagicMock(permit_id="2020-3"),
             ]
 
             # Fetch flyers

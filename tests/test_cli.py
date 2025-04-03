@@ -110,7 +110,7 @@ class TestFormatOutput(unittest.TestCase):
         event = Event(
             id="2020-123",
             name="Test Event",
-            permit_number="2020-123",
+            permit_id="2020-123",
             date=date(2020, 1, 1),
             location="Test Location",
             state="CA",
@@ -125,7 +125,7 @@ class TestFormatOutput(unittest.TestCase):
         event = Event(
             id="2020-123",
             name="Test Event",
-            permit_number="2020-123",
+            permit_id="2020-123",
             date=date(2020, 1, 1),
             location="Test Location",
             state="CA",
@@ -140,7 +140,7 @@ class TestFormatOutput(unittest.TestCase):
         event = Event(
             id="2020-123",
             name="Test Event",
-            permit_number="2020-123",
+            permit_id="2020-123",
             date=date(2020, 1, 1),
             location="Test Location",
             state="CA",
@@ -150,7 +150,7 @@ class TestFormatOutput(unittest.TestCase):
         # Check for the presence of headers and data, not the exact order
         self.assertIn("id", output)
         self.assertIn("name", output)
-        self.assertIn("permit_number", output)
+        self.assertIn("permit_id", output)
         self.assertIn("date", output)
         self.assertIn("location", output)
         self.assertIn("state", output)
@@ -165,7 +165,7 @@ class TestFormatOutput(unittest.TestCase):
         event = Event(
             id="2020-123",
             name="Test Event",
-            permit_number="2020-123",
+            permit_id="2020-123",
             date=date(2020, 1, 1),
             location="Test Location",
             state="CA",
@@ -191,7 +191,7 @@ class TestMainFunction(unittest.TestCase):
             Event(
                 id="2020-123",
                 name="Test Event",
-                permit_number="2020-123",
+                permit_id="2020-123",
                 date=date(2020, 1, 1),
                 location="Test Location",
                 state="CA",

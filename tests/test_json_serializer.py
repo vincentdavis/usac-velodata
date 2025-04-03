@@ -69,7 +69,7 @@ class TestJsonSerializer(unittest.TestCase):
         self.test_event = Event(
             id="event123",
             name="Test Event",
-            permit_number="2023-123",
+            permit_id="2023-123",
             date=self.test_date,
             location="Somewhere, USA",
             state="WA",
@@ -82,7 +82,7 @@ class TestJsonSerializer(unittest.TestCase):
         self.test_event_details = EventDetails(
             id="event123",
             name="Test Event",
-            permit_number="2023-123",
+            permit_id="2023-123",
             start_date=self.test_date,
             end_date=self.test_date,
             location="Somewhere, USA",
@@ -95,10 +95,7 @@ class TestJsonSerializer(unittest.TestCase):
             registration_url="https://example.com/register",
             is_usac_sanctioned=True,
             categories=["Cat 1/2", "Cat 3", "Cat 4/5"],
-            disciplines=[
-                {"id": "1", "name": "Road Race"},
-                {"id": "2", "name": "Time Trial"}
-            ],
+            disciplines=[{"id": "1", "name": "Road Race"}, {"id": "2", "name": "Time Trial"}],
             description="A test event",
         )
 

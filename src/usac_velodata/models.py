@@ -121,7 +121,7 @@ class Event(BaseModel):
 
     id: str
     name: str
-    permit_number: str
+    permit_id: str
     date: date | None
     submit_date: date | None
     location: str
@@ -142,7 +142,7 @@ class EventDetails(BaseModel):
 
     id: str
     name: str
-    permit_number: str
+    permit_id: str
     start_date: date | None = None
     end_date: date | None = None
     location: str | None = None

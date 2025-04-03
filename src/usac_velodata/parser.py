@@ -824,7 +824,7 @@ class EventDetailsParser(BaseParser):
             Event details dictionary containing:
                 - id: Unique ID (same as permit number)
                 - name: Name of the event
-                - permit_number: Permit number
+                - permit_id: Permit number
                 - start_date: Start date of the event
                 - end_date: End date of the event
                 - location: Location of the event
@@ -845,7 +845,7 @@ class EventDetailsParser(BaseParser):
 
         # Set the ID and permit number
         event_details["id"] = permit
-        event_details["permit_number"] = permit
+        event_details["permit_id"] = permit
 
         # Extract the year from the permit number
         year_match = re.match(r"(\d{4})-", permit)
@@ -1775,7 +1775,7 @@ class FlyerFetcher(BaseParser):
                 for state in states:
                     try:
                         events = client.get_events(state, year)
-                        permits.extend([event.permit_number for event in events])
+                        permits.extend([event.permit_id for event in events])
                         logger.info(f"Found {len(events)} events for {state} {year}")
                     except Exception as e:
                         logger.error(f"Error getting events for {state} {year}: {e!s}")
