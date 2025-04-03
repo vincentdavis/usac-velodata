@@ -116,18 +116,19 @@ class EventSearchResponse(BaseModel):
 
 class Event(BaseModel):
     """Model for a USA Cycling event (simplified version).
+
     This is obtained from a year, state event list page.
     """
 
     id: str
-    name: str
     permit_id: str
+    year: int
+    state: str
+    name: str
     date: date | None
     submit_date: date | None
-    location: str
-    state: str
-    year: int
-    event_type: EventType | None = None
+    location: str  # TODO: I dont think this ever has a value
+    event_type: EventType | None = None  # TODO: I dont think this ever has a value
     url: str | None = None
     html: str | None = None  # This is the table row.
 

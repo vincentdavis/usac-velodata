@@ -146,11 +146,11 @@ class USACyclingClient:
             logger.error(f"Error getting events for {state} in {year}: {e!s}")
             raise
 
-    def get_event_details(self, permit: str) -> EventDetails:
+    def get_event_details(self, permit_id: str) -> EventDetails:
         """Get detailed information about a specific event.
 
         Args:
-            permit: Permit number (e.g., '2020-26')
+            permit_id: Permit number (e.g., '2020-26')
 
         Returns:
             EventDetails object
@@ -162,7 +162,7 @@ class USACyclingClient:
         """
         try:
             # Parse event details
-            event_data = self._event_details_parser.get_event_details(permit)
+            event_data = self._event_details_parser.get_event_details(permit_id)
 
             # Convert to EventDetails model object
             event_details = EventDetails(**event_data)
@@ -170,7 +170,7 @@ class USACyclingClient:
             return event_details
 
         except (NetworkError, ParseError) as e:
-            logger.error(f"Error getting event details for permit {permit}: {e!s}")
+            logger.error(f"Error getting event details for permit {permit_id}: {e!s}")
             raise
 
     def get_race_categories(self, info_id: str, label: str) -> list[RaceCategory]:

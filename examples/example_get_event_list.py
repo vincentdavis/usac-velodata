@@ -6,3 +6,7 @@ if __name__ == "__main__":
     )
     event_list = ucc.get_events(state="CO", year=2024)
     print(event_list)
+
+    event_details = ucc.get_event_details(permit_id="2024-13211")
+
+    print(event_details)
