@@ -168,7 +168,7 @@ class TestUSACyclingClient(unittest.TestCase):
         """Test getting disciplines for an event."""
         # Mock fetch_permit_page
         # Load sample data from file
-        with open("../samples/permit_pages/2020-26.html") as f:
+        with open(self.samples_dir / "permit_pages/2020-26.html") as f:
             mock_fetch_permit_page.return_value = f.read()
 
         # Get disciplines
