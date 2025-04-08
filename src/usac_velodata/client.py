@@ -11,7 +11,7 @@ from typing import Any
 from bs4 import BeautifulSoup
 from pydantic import ValidationError as pydantic_ValidationError
 
-from .exceptions import NetworkError, ParseError, ValidationError
+from .exceptions import IPBlockedError, NetworkError, ParseError, ValidationError
 from .models import Event, EventDetails, RaceCategory, RaceResult, Rider
 from .parser import BaseParser, EventDetailsParser, EventListParser, FlyerFetcher, RaceResultsParser
 from .utils import configure_logging, logger
@@ -97,6 +97,8 @@ class USACyclingClient:
         Raises:
             NetworkError: If there's an issue with the network request
             ParseError: If there's an issue parsing the response
+            ValidationError: If the input parameters are invalid
+            IPBlockedError: If the IP has been blocked by USA Cycling
 
         """
         # Validate inputs
@@ -142,8 +144,11 @@ class USACyclingClient:
 
             return events
 
-        except (NetworkError, ParseError) as e:
-            logger.error(f"Error getting events for {state} in {year}: {e!s}")
+        except (NetworkError, ParseError, IPBlockedError) as e:
+            if isinstance(e, IPBlockedError):
+                logger.critical(f"IP has been blocked by USA Cycling. Further requests will not succeed: {e!s}")
+            else:
+                logger.error(f"Error getting events for {state} in {year}: {e!s}")
             raise
 
     def get_event_details(self, permit_id: str) -> EventDetails:
@@ -158,6 +163,7 @@ class USACyclingClient:
         Raises:
             NetworkError: If there's an issue with the network request
             ParseError: If there's an issue parsing the response
+            IPBlockedError: If the IP has been blocked by USA Cycling
 
         """
         try:
@@ -169,8 +175,11 @@ class USACyclingClient:
 
             return event_details
 
-        except (NetworkError, ParseError) as e:
-            logger.error(f"Error getting event details for permit {permit_id}: {e!s}")
+        except (NetworkError, ParseError, IPBlockedError) as e:
+            if isinstance(e, IPBlockedError):
+                logger.critical(f"IP has been blocked by USA Cycling. Further requests will not succeed: {e!s}")
+            else:
+                logger.error(f"Error getting event details for permit {permit_id}: {e!s}")
             raise
 
     def get_race_categories(self, info_id: str, label: str) -> list[RaceCategory]:
@@ -186,6 +195,7 @@ class USACyclingClient:
         Raises:
             NetworkError: If there's an issue with the network request
             ParseError: If there's an issue parsing the response
+            IPBlockedError: If the IP has been blocked by USA Cycling
 
         """
         try:
@@ -219,15 +229,18 @@ class USACyclingClient:
 
             return categories
 
-        except (NetworkError, ParseError) as e:
-            logger.error(f"Error getting race categories for info_id {info_id}: {e!s}")
+        except (NetworkError, ParseError, IPBlockedError) as e:
+            if isinstance(e, IPBlockedError):
+                logger.critical(f"IP has been blocked by USA Cycling. Further requests will not succeed: {e!s}")
+            else:
+                logger.error(f"Error getting race categories for info_id {info_id}: {e!s}")
             raise
 
     def get_race_results(self, race_id: str, category_info: dict[str, Any] | None = None) -> RaceResult:
-        """Get race results for a specific race.
+        """Get detailed results for a specific race.
 
         Args:
-            race_id: ID of the race
+            race_id: Race ID (e.g., '1234567')
             category_info: Optional category information to include
 
         Returns:
@@ -236,6 +249,7 @@ class USACyclingClient:
         Raises:
             NetworkError: If there's an issue with the network request
             ParseError: If there's an issue parsing the response
+            IPBlockedError: If the IP has been blocked by USA Cycling
 
         """
         try:
@@ -277,8 +291,11 @@ class USACyclingClient:
 
             return race_result
 
-        except (NetworkError, ParseError) as e:
-            logger.error(f"Error getting race results for race ID {race_id}: {e!s}")
+        except (NetworkError, ParseError, IPBlockedError) as e:
+            if isinstance(e, IPBlockedError):
+                logger.critical(f"IP has been blocked by USA Cycling. Further requests will not succeed: {e!s}")
+            else:
+                logger.error(f"Error getting race results for race ID {race_id}: {e!s}")
             raise
 
     def get_rider_results(self, rider_name: str, year: int | None = None) -> list[tuple[Event, RaceResult]]:
@@ -302,16 +319,21 @@ class USACyclingClient:
         raise NotImplementedError("Rider search is not yet implemented")
 
     def get_disciplines_for_event(self, permit: str) -> list[dict[str, Any]]:
-        """Get disciplines for an event.
+        """Get a list of disciplines for a specific event.
 
         Args:
-            permit: USA Cycling permit number (e.g., '2020-26')
+            permit: Permit number (e.g., '2020-26')
 
         Returns:
-            List of discipline dictionaries containing:
-                - id: Info ID for the discipline
-                - name: Discipline name
-                - label: Discipline label (includes date)
+            List of discipline dictionaries, each containing:
+                - load_info_id: The info ID for the discipline
+                - discipline: The name of the discipline
+                - race_date: The date of the discipline (if available)
+
+        Raises:
+            NetworkError: If there's an issue with the network request
+            ParseError: If there's an issue parsing the response
+            IPBlockedError: If the IP has been blocked by USA Cycling
 
         """
         try:
@@ -349,8 +371,11 @@ class USACyclingClient:
 
             return disciplines
 
-        except (NetworkError, ParseError) as e:
-            logger.error(f"Error getting disciplines for permit {permit}: {e!s}")
+        except (NetworkError, ParseError, IPBlockedError) as e:
+            if isinstance(e, IPBlockedError):
+                logger.critical(f"IP has been blocked by USA Cycling. Further requests will not succeed: {e!s}")
+            else:
+                logger.error(f"Error getting disciplines for permit {permit}: {e!s}")
             raise
 
     def get_races_for_permit(self, permit: str) -> list[dict[str, Any]]:

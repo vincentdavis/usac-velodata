@@ -276,6 +276,41 @@ class TestEventDetailsParser(unittest.TestCase):
             # Verify categories were processed
             self.assertIsInstance(event_details["categories"], list)
 
+    @mock.patch("usac_velodata.parser.BaseParser._fetch_with_retries")
+    def test_ip_blocked_error(self, mock_fetch_with_retries):
+        """Test that IPBlockedError is raised when the response indicates the IP has been blocked."""
+        # Path to invalid access fixture
+        samples_dir = Path(os.path.dirname(os.path.dirname(__file__))) / "samples"
+        fixture_path = samples_dir / "errors" / "invalid_access.html"
+        
+        # Load the invalid access HTML if it exists
+        if fixture_path.exists():
+            with open(fixture_path, encoding="utf-8") as f:
+                invalid_access_html = f.read()
+        else:
+            # Create a minimal invalid access HTML for tests
+            invalid_access_html = """
+            <html>
+            <body>
+                <h1 style="color:maroon;">Invalid user access</h1>
+                <br/><br/>If you are seeing this page, then your account activity on our website appears to be malicious in nature.
+                This could be the result of a number of factors including too many access attempts to our site, or incorrect or malformed data
+                being passed to our site.
+            </body>
+            </html>
+            """
+        
+        # Create a mock response with invalid access content
+        mock_response = mock.Mock()
+        mock_response.text = invalid_access_html
+        mock_response.status_code = 200
+        mock_fetch_with_retries.return_value = mock_response
+        
+        # Verify IPBlockedError is raised
+        from usac_velodata.exceptions import IPBlockedError
+        with self.assertRaises(IPBlockedError):
+            self.parser.fetch_permit_page("9999-99")
+
 
 if __name__ == "__main__":
     unittest.main()

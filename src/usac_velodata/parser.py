@@ -13,7 +13,7 @@ from urllib.parse import quote, urljoin
 import requests
 from bs4 import BeautifulSoup
 
-from .exceptions import NetworkError, ParseError
+from .exceptions import IPBlockedError, NetworkError, ParseError
 from .utils import logger
 
 
@@ -240,6 +240,7 @@ class BaseParser:
 
         Raises:
             NetworkError: If the request fails
+            IPBlockedError: If the response indicates the IP has been blocked
 
         """
         # Check cache first
@@ -256,6 +257,14 @@ class BaseParser:
         # Make the request
         try:
             response = self._fetch_with_retries(url, params=params)
+            
+            # Check if the response contains the invalid_access page
+            if "Invalid user access" in response.text and "malicious" in response.text:
+                logger.error(f"IP address has been blocked by USA Cycling: {url}")
+                raise IPBlockedError(
+                    "Your IP has been blocked by USA Cycling",
+                    url=url
+                )
 
             # Cache the response
             if self.cache_enabled:
@@ -263,6 +272,9 @@ class BaseParser:
 
             return response.text
         except Exception as e:
+            if isinstance(e, IPBlockedError):
+                raise
+                
             logger.error(f"Failed to fetch {url}: {e!s}")
             raise NetworkError(f"Failed to fetch {url}: {e!s}") from e
 
@@ -287,6 +299,7 @@ class BaseParser:
         Raises:
             NetworkError: If the request fails
             ParseError: If the response isn't valid JSON
+            IPBlockedError: If the response indicates the IP has been blocked
 
         """
         # Check cache first
@@ -309,6 +322,14 @@ class BaseParser:
                 data=data,
                 headers={"Accept": "application/json, text/javascript, */*; q=0.01"},
             )
+            
+            # Check if the response contains the invalid_access page
+            if "Invalid user access" in response.text and "malicious" in response.text:
+                logger.error(f"IP address has been blocked by USA Cycling: {url}")
+                raise IPBlockedError(
+                    "Your IP has been blocked by USA Cycling. Please contact them to resolve this issue.",
+                    url=url
+                )
 
             try:
                 json_data = response.json()
@@ -329,7 +350,7 @@ class BaseParser:
 
         except Exception as e:
             logger.error(f"Failed to fetch JSON from {url}: {e!s}")
-            if isinstance(e, ParseError | NetworkError):
+            if isinstance(e, (ParseError, NetworkError, IPBlockedError)):
                 raise
             else:
                 raise NetworkError(f"Failed to fetch JSON from {url}: {e!s}") from e
@@ -566,6 +587,14 @@ class BaseParser:
             html_content = response.text
             logger.debug(f"Response received for {url}, length: {len(html_content)}")
 
+            # Check if the response contains the invalid_access page
+            if "Invalid user access" in html_content and "malicious" in html_content:
+                logger.error(f"IP address has been blocked by USA Cycling: {url}")
+                raise IPBlockedError(
+                    "Your IP has been blocked by USA Cycling. Please contact them to resolve this issue.",
+                    url=url
+                )
+
             # Parse JSON response if it looks like JSON
             json_data = None
             if html_content.startswith("{"):
@@ -680,6 +709,9 @@ class BaseParser:
             return result
 
         except Exception as e:
+            if isinstance(e, IPBlockedError):
+                raise
+                
             logger.error(f"Failed to fetch race results for {race_id}: {e!s}")
             # Return minimal result on error
             return {"id": race_id, "name": "", "riders": []}
