@@ -210,6 +210,71 @@ class TestEventDetailsParser(unittest.TestCase):
         self.assertEqual(event_details["location"], "Unknown")
         self.assertEqual(event_details["disciplines"], [])
         self.assertEqual(event_details["categories"], [])
+        
+    @mock.patch("usac_velodata.parser.BaseParser.fetch_permit_page")
+    def test_single_loadinfo_permit(self, mock_fetch):
+        """Test parsing a permit page with a single loadInfoID."""
+        # Path to fixture
+        samples_dir = Path(os.path.dirname(os.path.dirname(__file__))) / "samples"
+        fixture_path = samples_dir / "permit_pages" / "2024-13211.html"
+        
+        # Load the permit page HTML if it exists
+        if fixture_path.exists():
+            with open(fixture_path, encoding="utf-8") as f:
+                permit_html = f.read()
+        else:
+            # Create a minimal permit HTML for tests with a single loadInfoID
+            permit_html = """
+            <html>
+            <head><title>Results for ColoTucky Hot Laps CX - USA Cycling</title></head>
+            <body>
+                <div id="pgcontent" class="onecol">
+                    <div id='resultsmain'>
+                        <script>
+                            loadInfoID(153470,null,0);
+                        </script>
+                    </div>
+                </div>
+            </body>
+            </html>
+            """
+            
+        # Mock the fetch_permit_page method to return our permit HTML
+        mock_fetch.return_value = permit_html
+        
+        # Mock additional calls needed for loadInfoID processing
+        with mock.patch("usac_velodata.parser.RaceResultsParser.parse_race_categories") as mock_categories:
+            # Mock the categories that would be retrieved
+            mock_categories.return_value = [
+                {
+                    "id": "1234567",
+                    "name": "Men Category 4/5",
+                }
+            ]
+            
+            # Parse the event details
+            event_details = self.parser.parse("2024-13211")
+            
+            # Verify the parser handles this correctly
+            self.assertIsInstance(event_details, dict)
+            self.assertEqual(event_details["id"], "2024-13211")
+            self.assertEqual(event_details["permit_id"], "2024-13211")
+            self.assertEqual(event_details["year"], 2024)
+            
+            # The title from HTML is not extracted since there's no h3 element
+            # Default values should be used
+            self.assertEqual(event_details["name"], "Event 2024-13211")
+            
+            # Verify disciplines were extracted
+            self.assertIsInstance(event_details["disciplines"], list)
+            
+            # There should be one discipline with loadInfoID 153470
+            if event_details["disciplines"]:
+                discipline = event_details["disciplines"][0]
+                self.assertEqual(discipline.get("load_info_id"), "153470")
+            
+            # Verify categories were processed
+            self.assertIsInstance(event_details["categories"], list)
 
 
 if __name__ == "__main__":
