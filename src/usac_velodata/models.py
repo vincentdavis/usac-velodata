@@ -126,7 +126,7 @@ class Event(BaseModel):
     state: str
     name: str
     date: date | None
-    submit_date: date | None
+    submit_date: date | None = None
     location: str  # TODO: I dont think this ever has a value
     event_type: EventType | None = None  # TODO: I dont think this ever has a value
     url: str | None = None

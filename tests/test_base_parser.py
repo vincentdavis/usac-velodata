@@ -102,6 +102,7 @@ class TestBaseParser(unittest.TestCase):
         # Mock response
         mock_response = mock.Mock()
         mock_response.json.return_value = {"data": "test"}
+        mock_response.text = '{"data": "test"}'
         mock_response.status_code = 200
         mock_request.return_value = mock_response
 

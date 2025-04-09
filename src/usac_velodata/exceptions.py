@@ -226,10 +226,10 @@ class CacheError(USACyclingError):
 
 
 class ConfigurationError(USACyclingError):
-    """Exception raised for configuration-related errors.
+    """Exception raised for configuration errors.
 
-    This occurs when the library is configured with invalid parameters
-    or incompatible settings.
+    This occurs when the package is configured incorrectly or when
+    required configuration is missing.
     """
 
     def __init__(
@@ -245,7 +245,7 @@ class ConfigurationError(USACyclingError):
         Args:
             message: Human-readable error message
             parameter: The configuration parameter that caused the error
-            value: The invalid value
+            value: The problematic value, if applicable
             cause: Original exception that caused this error, if any
             details: Additional details about the error context
 
@@ -260,4 +260,43 @@ class ConfigurationError(USACyclingError):
         if value is not None:
             full_details["value"] = value
 
+        super().__init__(message, cause, full_details)
+
+
+class IPBlockedError(USACyclingError):
+    """Exception raised when the user's IP has been blocked by USA Cycling.
+    
+    This occurs when the server returns the invalid_access.php page,
+    typically due to excessive requests or suspicious activity.
+    This is a special case that should stop any retry or rate-limiting behavior,
+    as further requests will not succeed until the block is lifted.
+    """
+    
+    def __init__(
+        self,
+        message: str,
+        ip_address: str | None = None,
+        url: str | None = None,
+        cause: Exception | None = None,
+        details: dict[str, Any] | None = None,
+    ):
+        """Initialize the IP blocked error.
+        
+        Args:
+            message: Human-readable error message
+            ip_address: The IP address that was blocked, if known
+            url: The URL that triggered the block
+            cause: Original exception that caused this error, if any
+            details: Additional details about the error context
+        """
+        self.ip_address = ip_address
+        self.url = url
+        
+        # Add IP address and URL to details
+        full_details = details or {}
+        if ip_address:
+            full_details["ip_address"] = ip_address
+        if url:
+            full_details["url"] = url
+            
         super().__init__(message, cause, full_details)

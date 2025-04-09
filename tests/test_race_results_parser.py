@@ -20,6 +20,7 @@ class TestRaceResultsParser(unittest.TestCase):
 
         # Path to test fixtures
         samples_dir = Path(os.path.dirname(os.path.dirname(__file__))) / "samples"
+        self.errors_dir = samples_dir / "errors"
 
         # Race results fixture
         race_results_path = samples_dir / "race_results" / "1337864.html"
@@ -44,6 +45,19 @@ class TestRaceResultsParser(unittest.TestCase):
                 self.load_info_json = self._create_test_load_info()
         else:
             self.load_info_json = self._create_test_load_info()
+
+        # Load error sample pages
+        if os.path.exists(self.errors_dir / "invalid_access.html"):
+            with open(self.errors_dir / "invalid_access.html", encoding="utf-8") as f:
+                self.invalid_access_html = f.read()
+        else:
+            self.invalid_access_html = "<html><body>Invalid Access</body></html>"
+
+        if os.path.exists(self.errors_dir / "no_results_found.html"):
+            with open(self.errors_dir / "no_results_found.html", encoding="utf-8") as f:
+                self.no_results_found_html = f.read()
+        else:
+            self.no_results_found_html = "<html><body>No Results Found</body></html>"
 
     def _create_test_race_results(self):
         """Create test race results data."""
@@ -214,6 +228,95 @@ class TestRaceResultsParser(unittest.TestCase):
         self.assertEqual(race_results["category"]["name"], "XCU Men 1:55 Category A")
         self.assertEqual(race_results["event_id"], "2020-26")
         self.assertEqual(race_results["date"], date(2020, 12, 2))
+
+    @mock.patch("usac_velodata.parser.BaseParser._fetch_with_retries")
+    def test_invalid_access(self, mock_fetch_with_retries):
+        """Test handling of invalid access error page."""
+        # Create a mock response with Unauthorized access content
+        mock_response = mock.Mock()
+        mock_response.text = "<html><body>Unauthorized access!</body></html>"
+        mock_response.status_code = 200
+        mock_fetch_with_retries.return_value = mock_response
+        
+        # Test parsing race results for a non-existent race ID
+        race_id = "9999999"
+        result = self.parser.fetch_race_results(race_id)
+        
+        # The parser should handle this gracefully
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result["id"], race_id)
+        self.assertEqual(result["riders"], [])
+        
+        # Now test the parse method
+        race_data = self.parser.parse(race_id)
+        
+        # Verify the result has the expected format
+        self.assertEqual(race_data["id"], race_id)
+        self.assertEqual(race_data["name"], "")
+        self.assertEqual(race_data["riders"], [])
+        self.assertIsInstance(race_data["category"], dict)
+
+    @mock.patch("usac_velodata.parser.BaseParser._fetch_with_retries")
+    def test_no_results_found(self, mock_fetch_with_retries):
+        """Test handling of 'no results found' error page."""
+        # Create a mock response with no results content
+        mock_response = mock.Mock()
+        mock_response.text = self.no_results_found_html
+        mock_response.status_code = 200
+        mock_fetch_with_retries.return_value = mock_response
+        
+        # Test parsing race results for a race with no results
+        race_id = "8888888"
+        result = self.parser.fetch_race_results(race_id)
+        
+        # The parser should handle this gracefully
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result["id"], race_id)
+        self.assertEqual(result["riders"], [])
+        
+        # Now test the parse method
+        race_data = self.parser.parse(race_id)
+        
+        # Verify the result has the expected format
+        self.assertEqual(race_data["id"], race_id)
+        self.assertEqual(race_data["riders"], [])
+        self.assertIsInstance(race_data["category"], dict)
+
+    @mock.patch("usac_velodata.parser.BaseParser._fetch_with_retries")
+    def test_ip_blocked_error(self, mock_fetch_with_retries):
+        """Test that IPBlockedError is raised when the response indicates the IP has been blocked."""
+        # Path to invalid access fixture
+        samples_dir = Path(os.path.dirname(os.path.dirname(__file__))) / "samples"
+        fixture_path = samples_dir / "errors" / "invalid_access.html"
+        
+        # Load the invalid access HTML if it exists
+        if fixture_path.exists():
+            with open(fixture_path, encoding="utf-8") as f:
+                invalid_access_html = f.read()
+        else:
+            # Create a minimal invalid access HTML for tests
+            invalid_access_html = """
+            <html>
+            <body>
+                <h1 style="color:maroon;">Invalid user access</h1>
+                <br/><br/>If you are seeing this page, then your account activity on our website appears to be malicious in nature.
+                This could be the result of a number of factors including too many access attempts to our site, or incorrect or malformed data
+                being passed to our site.
+            </body>
+            </html>
+            """
+        
+        # Create a mock response with invalid access content
+        mock_response = mock.Mock()
+        mock_response.text = invalid_access_html
+        mock_response.status_code = 200
+        mock_fetch_with_retries.return_value = mock_response
+        
+        # Verify IPBlockedError is raised
+        from usac_velodata.exceptions import IPBlockedError
+        with self.assertRaises(IPBlockedError):
+            self.parser.fetch_race_results("9999999")
+
 
 if __name__ == "__main__":
     unittest.main()
